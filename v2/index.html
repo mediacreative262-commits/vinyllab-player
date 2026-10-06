@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>VinylLab Player</title>
+<style>
+:root{--bg:#08090d;--panel:#11131a;--panel2:#171a23;--text:#f5f7fb;--muted:#9299aa;--accent:#74b9ff;--line:#292d38}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;min-height:100dvh;background:radial-gradient(circle at 50% -10%,#20283a 0,#08090d 42%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;padding-bottom:calc(74px + env(safe-area-inset-bottom));overscroll-behavior:none}
+.app{max-width:1050px;margin:auto;padding:12px}.header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.brand{font-weight:850;letter-spacing:.5px}.brand small{display:block;color:var(--muted);font-weight:500;font-size:10px}
+button,.fileBtn,select{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;padding:9px 11px;font-weight:700}button:active{transform:scale(.98)}.fileBtn input{display:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:rgba(17,19,26,.92);border:1px solid var(--line);border-radius:17px;padding:13px;box-shadow:0 10px 30px #0005}
+.player{min-height:510px;display:flex;flex-direction:column;align-items:center;justify-content:center}.vinyl{width:min(68vw,320px);aspect-ratio:1;border-radius:50%;background:repeating-radial-gradient(circle,#111 0 2px,#080808 2px 4px);box-shadow:0 15px 35px #000;position:relative;animation:spin 5s linear infinite;animation-play-state:paused;will-change:transform}.playing .vinyl{animation-play-state:running}@keyframes spin{to{transform:rotate(360deg)}}.vinyl:before{content:"";position:absolute;inset:13%;border-radius:50%;background:radial-gradient(circle,#d5b36c 0 8%,#a04b3f 8% 10%,#151515 10% 100%)}.vinyl:after{content:"";position:absolute;inset:48%;border-radius:50%;background:#ddd}
+.meta{text-align:center;margin:16px 0 8px}.meta b{font-size:18px}.meta span{display:block;color:var(--muted);font-size:12px;margin-top:3px;max-width:80vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress{width:100%;display:flex;align-items:center;gap:7px;color:var(--muted);font-size:10px}.progress input{flex:1}.controls{display:flex;gap:9px;align-items:center;margin:8px}.play{width:54px;height:54px;border-radius:50%;background:var(--accent);color:#07101a;border:0;font-size:19px}
+.row{display:flex;gap:7px;flex-wrap:wrap}.row>*{flex:1}.tabs{display:flex;gap:5px;margin-bottom:9px}.tab{flex:1}.tab.active{border-color:var(--accent);color:var(--accent)}
+.section{display:none}.section.active{display:block}.notice{color:var(--muted);font-size:11px;line-height:1.45}.eq{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;align-items:end}.band{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font-size:8px}.band input{writing-mode:vertical-lr;direction:rtl;height:145px;width:21px}.db{font-size:9px;color:var(--text)}
+.feature{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);gap:8px}.feature:last-child{border:0}.feature small{display:block;color:var(--muted);font-size:9px}.feature select{max-width:135px}
+.library{max-height:350px;overflow:auto}.track{display:flex;gap:9px;align-items:center;padding:9px;border-bottom:1px solid var(--line);cursor:pointer}.track div{min-width:0}.track b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.track small{color:var(--muted)}.track .x{margin-left:auto}
+.sliderRow{display:grid;grid-template-columns:70px 1fr 48px;gap:7px;align-items:center;margin:8px 0;font-size:11px}.sliderRow input{width:100%}.sliderRow output{text-align:right}
+.peqCard{background:#0d0f15;border:1px solid var(--line);border-radius:12px;padding:9px;margin-top:8px}.peqTitle{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.peqCard label{font-size:10px;color:var(--muted)}
+.bottom{position:fixed;z-index:20;left:0;right:0;bottom:0;padding:7px 10px max(7px,env(safe-area-inset-bottom));background:rgba(10,12,17,.96);border-top:1px solid var(--line);transform:translateZ(0);contain:layout paint}.bottomin{max-width:1050px;margin:auto;display:flex;gap:7px;align-items:center}.now{flex:1;min-width:0}.now b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}.now small{color:var(--muted);font-size:9px}.bottom button{padding:8px 10px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.player{min-height:440px}.vinyl{width:min(74vw,300px)}.eq{overflow-x:hidden}.bottom{position:fixed}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header"><div class="brand">VINYLLAB <small>Private Music Player • lightweight Web Audio</small></div>
+<div class="row"><label class="fileBtn">＋ Files<input id="files" type="file" accept="audio/mpeg,audio/flac,audio/ogg,audio/opus,audio/wav,audio/aac,audio/mp4,audio/*" multiple></label><button id="folderBtn">📁 Folder</button><button id="installBtn" hidden>Install</button></div></div>
+<div class="grid">
+<section class="card player" id="playerCard">
+<div class="vinyl"></div>
+<div class="meta"><b id="title">Belum ada lagu</b><span id="artist">Pilih file atau folder musik</span></div>
+<div class="progress"><span id="cur">0:00</span><input id="seek" type="range" min="0" max="100" value="0"><span id="dur">0:00</span></div>
+<div class="controls"><button id="prev">⏮</button><button class="play" id="play">▶</button><button id="next">⏭</button></div>
+<div class="row"><button id="shuffle">🔀</button><button id="repeat">🔁 Off</button><button id="mute">🔊</button></div>
+<audio id="audio" preload="metadata"></audio>
+</section>
+<section class="card">
+<div class="tabs"><button class="tab active" data-tab="eqTab">EQ</button><button class="tab" data-tab="dspTab">DSP</button><button class="tab" data-tab="libTab">Library</button></div>
+<div id="eqTab" class="section active">
+<div class="row"><button id="flat">Flat</button><button id="resetEq">Reset</button><select id="eqPreset"><option>Custom</option><option>Rock</option><option>Pop</option><option>Jazz</option><option>Classical</option><option>Bass Boost</option><option>Vocal</option><option>Electronic</option></select></div>
+<div class="sliderRow"><span>Preamp</span><input id="preamp" type="range" min="-12" max="12" step=".5" value="0"><output id="preampOut">0 dB</output></div>
+<div class="eq" id="eq"></div>
+<p class="notice">20-band EQ + preamp. Filter chain hanya aktif setelah playback dimulai.</p>
+</div>
+<div id="dspTab" class="section">
+<div class="feature"><span>XWide<small>stereo widening</small></span><select id="xwide"><option value="0">Off</option><option value="1">XWide 1</option><option value="2">XWide 2</option><option value="3">XWide 3</option></select></div>
+<div class="feature"><span>XBass<small>low shelf</small></span><select id="xbass"><option value="0">Off</option><option value="1">XBass 1</option><option value="2">XBass 2</option><option value="3">XBass 3</option></select></div>
+<div class="feature"><span>Surround<small>safe stereo spatial blend</small></span><select id="surround"><option value="0">Off</option><option value="1">Surround 1</option><option value="2">Surround 2</option><option value="3">Surround 3</option></select></div>
+<div class="feature"><span>Replay Gain<small>track-volume normalization</small></span><button id="rg">OFF</button></div>
+<div class="feature"><span>Compressor<small>dynamic range</small></span><button id="comp">OFF</button></div>
+<h3 style="margin-bottom:4px">Parametric EQ</h3>
+<div class="peqCard">
+<div class="peqTitle"><span>Adaptive controls</span><span>drag, don't type</span></div>
+<div class="sliderRow"><span>Frequency</span><input id="peqFreq" type="range" min="20" max="20000" step="1" value="1000"><output id="peqFreqOut">1.00 kHz</output></div>
+<div class="sliderRow"><span>Q</span><input id="peqQ" type="range" min=".1" max="12" step=".05" value="1"><output id="peqQOut">1.00</output></div>
+<div class="sliderRow"><span>Gain</span><input id="peqGain" type="range" min="-18" max="18" step=".5" value="0"><output id="peqGainOut">0 dB</output></div>
+<div class="row"><select id="peqType"><option value="peaking">Peaking</option><option value="lowshelf">Low Shelf</option><option value="highshelf">High Shelf</option></select><button id="peqApply">Apply</button></div>
+</div>
+<p class="notice">"Adaptive" di sini berupa slider/log-frequency. Nilainya langsung mengubah filter. Full auto-EQ berbasis analisis lagu butuh FFT/lebih banyak CPU, jadi sengaja belum dipaksa agar HP tetap enteng.</p>
+</div>
+<div id="libTab" class="section"><div class="library" id="library"><div class="notice">Library kosong.</div></div><p class="notice">Folder picker mencoba membaca folder musik secara lokal. Browser tetap meminta izin akses. File tidak di-upload.</p></div>
+</section>
+</div></div>
+<div class="bottom"><div class="bottomin"><div class="now"><b id="miniTitle">Belum ada lagu</b><small id="miniStatus">Ready</small></div><button id="miniPlay">▶</button><button id="openEq">EQ</button></div></div>
+<script src="app.js"></script>
+</body></html>
